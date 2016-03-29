@@ -1,5 +1,5 @@
 //Const
-var lineTreshold = 0.50;
+var lineTreshold = 0.25;
 var zoom = 2.0;
 
 //Global
@@ -18,7 +18,7 @@ function detectLines(){
         var percentFilled = 0;
         for(var x = 0; x<img.width*zoom; x++)
         {
-            if( pixels[x*4 + y*img.width*zoom *4] < 230)
+            if( pixels[x*4 + y*img.width*zoom *4] < 240)
             {
                 percentFilled += 1/img.width*zoom;
                  if(percentFilled > lineTreshold)
@@ -39,6 +39,10 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
+}
+
+function detectChar(y1,y2){
+    
 }
 
 function loadInputImg(){
