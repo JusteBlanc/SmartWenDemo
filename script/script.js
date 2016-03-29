@@ -53,7 +53,7 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
-    console.log(linesYCoord);
+    console.log("LinesYCoord: " + linesYCoord);
     return(linesYCoord);
 }
 
