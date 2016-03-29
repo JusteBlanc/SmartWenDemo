@@ -89,8 +89,6 @@ function loadInputImg(){
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         detectLines();
-        var Tab = [[0,12],[50,200]];
-        detectChar(Tab);
     }
 }
 
