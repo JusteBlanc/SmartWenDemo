@@ -54,7 +54,7 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
-    console.log(linesYCoord);
+    console.log("LinesYCoord: " + linesYCoord);
     return(linesYCoord);
 }
 
@@ -132,6 +132,8 @@ function loadInputImg(){
     img.src = 'image/imerir.jpg';
     img.onload = function()
     {
+        initializeCanvas(img.width, img.height);
+        
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         binary();
@@ -166,17 +168,32 @@ function ocradjs()
     console.log(text);
 }
 
-function initialize()
+function appendCanvas(canvasName, width, height)
 {
+    var cvs = document.createElement("canvas");
+    cvs.id = 'cvs-' + canvasName;
+    cvs.setAttribute("width",width * ZOOM);
+    cvs.setAttribute("height",height * ZOOM);
+    document.getElementById('div-' + canvasName).appendChild(cvs);
+}
+
+function initializeCanvas(width, height)
+{
+    appendCanvas("input", width, height);
     ctxInput = document.getElementById('cvs-input').getContext('2d');
+    appendCanvas("gray", width, height);        
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
+<<<<<<< HEAD
     ctxBinary = document.getElementById('cvs-binary').getContext('2d');
+=======
+    appendCanvas('lines', width, height);
+>>>>>>> c88b2bec17b0e69f5ec9edf990aea032d0bfe4ba
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
+    appendCanvas('char', width, height);
     ctxChar = document.getElementById('cvs-char').getContext('2d');
 }
 
 $(document).ready(function(){
-    initialize();
     loadInputImg();
-    ocradjs();
+    //ocradjs();
 });
