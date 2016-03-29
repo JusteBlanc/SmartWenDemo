@@ -12,7 +12,7 @@ function detectLines(){
     var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
-    var continuousWhite = false;
+    var continuousText = false;
     var tempCoord = new Array();
     for (var y = 0; y < img.height * ZOOM; y++)
     {
@@ -30,14 +30,14 @@ function detectLines(){
                  } 
             }
         }
-        if(isEmpty && !continuousWhite){
+        if(!isEmpty && !continuousText){
             tempCoord = [y , ];
-            continuousWhite = true;
+            continuousText = true;
         }
-        else if(!isEmpty && continuousWhite)
+        else if(isEmpty && continuousText)
         {
             tempCoord[1] = y-1;
-            continuousWhite = false;
+            continuousText = false;
             linesYCoord.push(tempCoord);
         }
         //Coloration ligne vide
@@ -53,6 +53,7 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
+    console.log(linesYCoord);
     return(linesYCoord);
 }
 
