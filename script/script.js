@@ -5,7 +5,7 @@ var WHITE_DETECT = 150;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, detectionResults;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxSquareChar, detectionResults;
 var detectionResults = {
     "textYCoord": new Array(),
     "breakYCoord": new Array(),
@@ -118,6 +118,7 @@ function detectChar(yTabs){
     $.each(yTabs, function(yIndex,yTab) {
         for( var x = 0; x < img.width * ZOOM; x++)
         {
+            
             var isEmpty = true;
             var percentFilled = 0;
             for( var y = yTab[0]; y < yTab[1]; y++)
@@ -143,6 +144,12 @@ function detectChar(yTabs){
                 tempCoord.h = yTab[1]-yTab[0];
                 continuousChar = false;
                 detectionResults["charCoord"].push(tempCoord);
+                tempCoord = {
+                    "x":0,
+                    "y":0,
+                    "w":0,
+                    "h":0,
+                };
             }
             //Coloration ligne vide
             if(isEmpty)
@@ -158,7 +165,6 @@ function detectChar(yTabs){
         }
     }, this);
     ctxChar.putImageData(imageData, 0, 0);
-    return detectionResults["charCoord"];
 }
 
 function loadInputImg(){
@@ -173,7 +179,47 @@ function loadInputImg(){
         binary();
         detectLines();
         detectChar(detectionResults["textYCoord"]);
+        drawChar()
     }
+}
+
+function drawChar(){
+    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
+    var index;
+    var offsetSquare = 1;
+    
+    $.each(detectionResults["charCoord"], function(charIndex,charCoord) {
+        console.log(charCoord);
+        
+        
+        
+        for(var x = charCoord.x - offsetSquare; x <= charCoord.x + charCoord.w + offsetSquare; x++)
+        {
+            index = (x + (charCoord.y - offsetSquare) * img.width * ZOOM) * 4;
+            pixels[index] = 255;
+            pixels[index + 1] = 0;
+            pixels[index + 2] = 0;
+            index = (x + (charCoord.y + charCoord.h + offsetSquare) * img.width * ZOOM) * 4;
+            pixels[index] = 255;
+            pixels[index + 1] = 0;
+            pixels[index + 2] = 0;
+        }
+        
+        for(var y = charCoord.y - offsetSquare ; y <= charCoord.y + charCoord.h + offsetSquare; y++)
+        {
+            index = (charCoord.x - offsetSquare + y * img.width * ZOOM) * 4;
+            pixels[index] = 255;
+            pixels[index + 1] = 0;
+            pixels[index + 2] = 0;
+            index = (charCoord.x + offsetSquare + charCoord.w + y * img.width * ZOOM) * 4;
+            pixels[index] = 255;
+            pixels[index + 1] = 0;
+            pixels[index + 2] = 0;
+        }
+    }, this);
+    ctxSquareChar.putImageData(imageData, 0, 0);
 }
 
 function convertToGray()
@@ -223,6 +269,8 @@ function initializeCanvas(width, height)
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
     appendCanvas('char', width, height);
     ctxChar = document.getElementById('cvs-char').getContext('2d');
+    appendCanvas('squareChar', width, height);
+    ctxSquareChar = document.getElementById('cvs-squareChar').getContext('2d');
     
 }
 
