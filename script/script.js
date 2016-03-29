@@ -1,26 +1,26 @@
 //Const
 var LINE_TRESHOLD = 0.30;
 var WHITE_DETECT = 240;
-var zoom = 2.0;
+var ZOOM = 2.0;
 
 //Global
 var img, ctxInput, ctxGray, ctxLines;
 
 function detectLines(){
-    var imageData = ctxGray.getImageData(0, 0, img.width * zoom, img.height * zoom);
+    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     
-    for (var y = 0; y < img.height * zoom; y++)
+    for (var y = 0; y < img.height * ZOOM; y++)
     {
         var isEmpty = true;
         var percentFilled = 0;
-        for(var x = 0; x < img.width * zoom; x++)
+        for(var x = 0; x < img.width * ZOOM; x++)
         {
-            var index = (x + y * img.width * zoom) * 4;
+            var index = (x + y * img.width * ZOOM) * 4;
             if( pixels[index] < WHITE_DETECT)
             {
-                percentFilled += 1 / img.width * zoom;
+                percentFilled += 1 / img.width * ZOOM;
                  if(percentFilled > LINE_TRESHOLD)
                  {
                      isEmpty = false;
@@ -30,9 +30,9 @@ function detectLines(){
         //Coloration ligne vide
         if(isEmpty)
         {
-            for(var x = 0; x < img.width * zoom; x++)
+            for(var x = 0; x < img.width * ZOOM; x++)
             {
-                var index = (x + y * img.width * zoom) * 4;
+                var index = (x + y * img.width * ZOOM) * 4;
                 pixels[index] = 255; // r
                 pixels[index + 1] = 0; // v
                 pixels[index + 2] = 0; // b
@@ -47,7 +47,7 @@ function loadInputImg(){
     img.src = 'image/imerir.bmp';
     img.onload = function()
     {
-        ctxInput.drawImage(img, 0, 0, img.width*zoom, img.height*zoom);
+        ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         detectLines();
     }
@@ -55,7 +55,7 @@ function loadInputImg(){
 
 function convertToGray()
 {
-    var imageData = ctxInput.getImageData(0, 0, img.width*zoom, img.height*zoom);
+    var imageData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length/4;
     
