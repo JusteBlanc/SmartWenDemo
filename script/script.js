@@ -5,7 +5,7 @@ var WHITE_DETECT = 240;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxLines, linesYCoord;
+var img, ctxInput, ctxGray, ctxLines, ctxChar, linesYCoord;
 
 function detectLines(){
     linesYCoord = new Array();
@@ -56,6 +56,8 @@ function detectLines(){
     return(linesYCoord);
 }
 
+
+
 function detectChar(yTabs){
     var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
@@ -102,6 +104,7 @@ function loadInputImg(){
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         detectLines();
+        detectChar(linesYCoord);
     }
 }
 
