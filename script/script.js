@@ -5,17 +5,25 @@ var WHITE_DETECT = 150;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxZoom, linesYCoord;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, detectionResults;
+var detectionResults = {
+    "textYCoord": new Array(),
+    "breakYCoord": new Array(),
+    "charCoord": new Array()
+};
 
 function detectLines(){
-    linesYCoord = new Array();
+    detectionResults["textYCoord"] = new Array();
     var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     var continuousText = false;
-    var tempCoord = new Array();
+    var continuousWhite = false;
+    var tempCoordText = new Array();
+    var tempCoordWhite = new Array();
     for (var y = 0; y < img.height * ZOOM; y++)
     {
+        // Detection des lignes "blanches"
         var isEmpty = true;
         var percentFilled = 0;
         for(var x = 0; x < img.width * ZOOM; x++)
@@ -30,17 +38,30 @@ function detectLines(){
                  } 
             }
         }
+        
+        // Recuperation des coordonees des sauts de lignes
+        if(isEmpty && !continuousWhite){
+            tempCoordWhite = [y, ];
+            continuousWhite = true;
+        }else if(!isEmpty && continuousWhite){
+            tempCoordWhite[1] = y-1;
+            continuousWhite = false;
+            detectionResults["breakYCoord"].push(tempCoordWhite);
+        }
+        
+        // Récuperation des coordonees des lignes de texte
         if(!isEmpty && !continuousText){
-            tempCoord = [y , ];
+            tempCoordText = [y , ];
             continuousText = true;
         }
         else if(isEmpty && continuousText)
         {
-            tempCoord[1] = y-1;
+            tempCoordText[1] = y-1;
             continuousText = false;
-            linesYCoord.push(tempCoord);
+            detectionResults["textYCoord"].push(tempCoordText);
         }
-        //Coloration ligne vide
+        
+        //Coloration des sauts de lignes
         if(isEmpty)
         {
             for(var x = 0; x < img.width * ZOOM; x++)
@@ -53,8 +74,7 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
-    console.log("LinesYCoord: " + linesYCoord);
-    return(linesYCoord);
+    return(detectionResults["textYCoord"]);
 }
 
 function binary(){
@@ -145,7 +165,7 @@ function loadInputImg(){
         convertToGray();
         binary();
         detectLines();
-        detectChar(linesYCoord);
+        detectChar(detectionResults["textYCoord"]);
         loupe();
     }
 }
