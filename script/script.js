@@ -103,11 +103,17 @@ function binary(){
 }
 
 function detectChar(yTabs){
+    var tempCoord = {
+        "x":0,
+        "y":0,
+        "w":0,
+        "h":0,
+    };
+    detectionResults["charCoord"] = new Array();
     var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     var continuousChar = false;
-    var tempCoord = new Array();
     
     $.each(yTabs, function(yIndex,yTab) {
         for( var x = 0; x < img.width * ZOOM; x++)
@@ -128,15 +134,15 @@ function detectChar(yTabs){
             }
             if(!isEmpty && !continuousChar)
             {
-                tempCoord[0] = x;
-                tempCoord[1] = yTab[0];
+                tempCoord.x = x;
+                tempCoord.y = yTab[0];
                 continuousChar = true;
             }else if(isEmpty && continuousChar)
             {
-                tempCoord[2] = x-tempCoord[0];
-                tempCoord[2] = yTab[1]-yTab[0];
+                tempCoord.w = x-tempCoord.x;
+                tempCoord.h = yTab[1]-yTab[0];
                 continuousChar = false;
-                charCoord.push(tempCoord);
+                detectionResults["charCoord"].push(tempCoord);
             }
             //Coloration ligne vide
             if(isEmpty)
@@ -152,6 +158,7 @@ function detectChar(yTabs){
         }
     }, this);
     ctxChar.putImageData(imageData, 0, 0);
+    return detectionResults["charCoord"];
 }
 
 function loadInputImg(){
@@ -166,7 +173,6 @@ function loadInputImg(){
         binary();
         detectLines();
         detectChar(detectionResults["textYCoord"]);
-        loupe();
     }
 }
 
