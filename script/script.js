@@ -1,5 +1,6 @@
 //Const
 var LINE_TRESHOLD = 0.30;
+var COLUMN_TRESHOLD = 0.30;
 var WHITE_DETECT = 240;
 var ZOOM = 2.0;
 
@@ -55,8 +56,42 @@ function detectLines(){
     return(linesYCoord);
 }
 
-function detectChar(y1,y2){
+function detectChar(yTabs){
+    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
     
+    $.each(yTabs, function(yIndex,yTab) {
+        for( var x = 0; x < img.width * ZOOM; x++)
+        {
+            var isEmpty = true;
+            var percentFilled = 0;
+            for( var y = yTab[0]; y < yTab[1]; y++)
+            {
+                var index = (x + y * img.width * ZOOM) * 4;
+                if( pixels[index] < WHITE_DETECT)
+                {
+                    percentFilled += 1 / img.width * ZOOM;
+                    if(percentFilled > COLUMN_TRESHOLD)
+                    {
+                        isEmpty = false;
+                    } 
+                }
+            }
+            //Coloration ligne vide
+            if(isEmpty)
+            {
+                for(var y = yTab[0]; y < yTab[1]; y++)
+                {
+                    var index = (x + y * img.width * ZOOM) * 4;
+                    pixels[index] = 0; // r
+                    pixels[index + 1] = 255; // v
+                    pixels[index + 2] = 0; // b
+                }
+            }
+        }
+    }, this);
+    ctxChar.putImageData(imageData, 0, 0);
 }
 
 function loadInputImg(){
@@ -101,6 +136,7 @@ function initialize()
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
+    ctxChar = document.getElementById('cvs-char').getContext('2d');
 }
 
 $(document).ready(function(){
