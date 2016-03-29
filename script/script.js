@@ -1,27 +1,27 @@
 //Const
-var lineTreshold = 0.50;
+var LINE_TRESHOLD = 0.30;
+var WHITE_DETECT = 240;
 var zoom = 2.0;
 
 //Global
 var img, ctxInput, ctxGray, ctxLines;
 
-
-
 function detectLines(){
-    var imageData = ctxGray.getImageData(0, 0, img.width*zoom, img.height*zoom);
+    var imageData = ctxGray.getImageData(0, 0, img.width * zoom, img.height * zoom);
     var pixels = imageData.data;  
-    var nbPixels = pixels.length/4;
+    var nbPixels = pixels.length / 4;
     
-    for (var y = 0; y < img.height*zoom;y++)
+    for (var y = 0; y < img.height * zoom; y++)
     {
         var isEmpty = true;
         var percentFilled = 0;
-        for(var x = 0; x<img.width*zoom; x++)
+        for(var x = 0; x < img.width * zoom; x++)
         {
-            if( pixels[x*4 + y*img.width*zoom *4] < 230)
+            var index = (x + y * img.width * zoom) * 4;
+            if( pixels[index] < WHITE_DETECT)
             {
-                percentFilled += 1/img.width*zoom;
-                 if(percentFilled > lineTreshold)
+                percentFilled += 1 / img.width * zoom;
+                 if(percentFilled > LINE_TRESHOLD)
                  {
                      isEmpty = false;
                  } 
@@ -30,11 +30,12 @@ function detectLines(){
         //Coloration ligne vide
         if(isEmpty)
         {
-            for(var x = 0; x<img.width*zoom;x++)
+            for(var x = 0; x < img.width * zoom; x++)
             {
-                pixels[x*4 + y*img.width*zoom*4] = 255; // r
-                pixels[x*4+ 1 + y*img.width*zoom*4] = 0; // v
-                pixels[x*4+ 2 + y*img.width*zoom*4] = 0; // b
+                var index = (x + y * img.width * zoom) * 4;
+                pixels[index] = 255; // r
+                pixels[index + 1] = 0; // v
+                pixels[index + 2] = 0; // b
             }
         }
     }    
@@ -83,7 +84,6 @@ function initialize()
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
-    
 }
 
 $(document).ready(function(){
