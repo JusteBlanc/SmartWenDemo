@@ -1,11 +1,11 @@
 //Const
-var LINE_TRESHOLD = 0.30;
-var COLUMN_TRESHOLD = 0.30;
-var WHITE_DETECT = 240;
+var LINE_TRESHOLD = 0.12;
+var COLUMN_TRESHOLD = 0.0002;
+var WHITE_DETECT = 150;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxLines, ctxChar, detectionResults;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, detectionResults;
 var detectionResults = {
     "textYCoord": new Array(),
     "breakYCoord": new Array(),
@@ -14,7 +14,7 @@ var detectionResults = {
 
 function detectLines(){
     detectionResults["textYCoord"] = new Array();
-    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     var continuousText = false;
@@ -39,7 +39,7 @@ function detectLines(){
             }
         }
         
-        // RÃ©cupÃ©ration des coordonÃ©es des sauts de lignes
+        // Récupération des coordonées des sauts de lignes
         if(isEmpty && !continuousWhite){
             tempCoordWhite = [y, ];
             continuousWhite = true;
@@ -49,7 +49,7 @@ function detectLines(){
             detectionResults["breakYCoord"].push(tempCoordWhite);
         }
         
-        // RÃ©cupÃ©ration des coordonÃ©es des lignes de texte
+        // Récupération des coordonées des lignes de texte
         if(!isEmpty && !continuousText){
             tempCoordText = [y , ];
             continuousText = true;
@@ -77,10 +77,39 @@ function detectLines(){
     return(detectionResults["textYCoord"]);
 }
 
+function binary(){
+    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
+    
+    for (var y = 0; y < img.height * ZOOM; y++)
+    {
+        for(var x = 0; x < img.width * ZOOM; x++)
+        {
+            var index = (x + y * img.width * ZOOM) * 4;
+            if( pixels[index] < WHITE_DETECT)
+            {
+                pixels[index] = 0; // r
+                pixels[index + 1] = 0; // v
+                pixels[index + 2] = 0; // b
+            }else{
+                pixels[index] = 255; // r
+                pixels[index + 1] = 255; // v
+                pixels[index + 2] = 255; // b
+            }
+        }
+    }
+    ctxBinary.putImageData(imageData, 0, 0);
+}
 
+function enlargeWhiteLines(yTabs){
+    var imageData = ctxLines.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
+}
 
 function detectChar(yTabs){
-    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     
@@ -119,13 +148,14 @@ function detectChar(yTabs){
 
 function loadInputImg(){
     img = new Image();
-    img.src = 'image/imerir.bmp';
+    img.src = 'image/imerir.jpg';
     img.onload = function()
     {
         initializeCanvas(img.width, img.height);
         
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
+        binary();
         detectLines();
         detectChar(detectionResults["textYCoord"]);
     }
@@ -172,6 +202,8 @@ function initializeCanvas(width, height)
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     appendCanvas("gray", width, height);        
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
+    appendCanvas("binary", width, height); 
+    ctxBinary = document.getElementById('cvs-binary').getContext('2d');
     appendCanvas('lines', width, height);
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
     appendCanvas('char', width, height);
