@@ -39,7 +39,7 @@ function detectLines(){
             }
         }
         
-        // Récupération des coordonées des sauts de lignes
+        // Recuperation des coordonees des sauts de lignes
         if(isEmpty && !continuousWhite){
             tempCoordWhite = [y, ];
             continuousWhite = true;
@@ -49,7 +49,7 @@ function detectLines(){
             detectionResults["breakYCoord"].push(tempCoordWhite);
         }
         
-        // Récupération des coordonées des lignes de texte
+        // RÃ©cuperation des coordonees des lignes de texte
         if(!isEmpty && !continuousText){
             tempCoordText = [y , ];
             continuousText = true;
