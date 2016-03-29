@@ -42,6 +42,10 @@ function detectLines(){
     ctxLines.putImageData(imageData, 0, 0);
 }
 
+function detectChar(y1,y2){
+    
+}
+
 function loadInputImg(){
     img = new Image();
     img.src = 'image/imerir.bmp';
