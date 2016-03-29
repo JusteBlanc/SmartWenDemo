@@ -44,21 +44,21 @@ function detectLines(){
 }
 
 function detectChar(yTabs){
-    var imageData = ctxGray.getImageData(0, 0, img.width * zoom, img.height * zoom);
+    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     
-    array.forEach(yTabs, function(yIndex,yTab) {
-        for( var x = 0; x < img.width * zoom; x++)
+    $.each(yTabs, function(yIndex,yTab) {
+        for( var x = 0; x < img.width * ZOOM; x++)
         {
             var isEmpty = true;
             var percentFilled = 0;
             for( var y = yTab[0]; y < yTab[1]; y++)
             {
-                var index = (x + y * img.width * zoom) * 4;
+                var index = (x + y * img.width * ZOOM) * 4;
                 if( pixels[index] < WHITE_DETECT)
                 {
-                    percentFilled += 1 / img.width * zoom;
+                    percentFilled += 1 / img.width * ZOOM;
                     if(percentFilled > COLUMN_TRESHOLD)
                     {
                         isEmpty = false;
@@ -70,9 +70,9 @@ function detectChar(yTabs){
             {
                 for(var y = yTab[0]; y < yTab[1]; y++)
                 {
-                    var index = (x + y * img.width * zoom) * 4;
-                    pixels[index] = 255; // r
-                    pixels[index + 1] = 0; // v
+                    var index = (x + y * img.width * ZOOM) * 4;
+                    pixels[index] = 0; // r
+                    pixels[index + 1] = 255; // v
                     pixels[index + 2] = 0; // b
                 }
             }
@@ -89,8 +89,8 @@ function loadInputImg(){
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         detectLines();
-        /*var Tab = [[0,12],[50,200]];
-        detectChar(Tab);*/
+        var Tab = [[0,12],[50,200]];
+        detectChar(Tab);
     }
 }
 
