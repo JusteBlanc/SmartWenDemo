@@ -1,9 +1,8 @@
 //Const
 var LINE_TRESHOLD = 0.12;
 var COLUMN_TRESHOLD = 0.0002;
-var WHITE_DETECT = 250;
-var BLACK_LIMIT = 160;
-var ZOOM = 1.0;
+var WHITE_DETECT = 150;
+var ZOOM = 2.0;
 
 //Global
 var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, linesYCoord;
@@ -68,7 +67,7 @@ function binary(){
         for(var x = 0; x < img.width * ZOOM; x++)
         {
             var index = (x + y * img.width * ZOOM) * 4;
-            if( pixels[index] < BLACK_LIMIT)
+            if( pixels[index] < WHITE_DETECT)
             {
                 pixels[index] = 0; // r
                 pixels[index + 1] = 0; // v
@@ -183,11 +182,9 @@ function initializeCanvas(width, height)
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     appendCanvas("gray", width, height);        
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
-<<<<<<< HEAD
+    appendCanvas("binary", width, height); 
     ctxBinary = document.getElementById('cvs-binary').getContext('2d');
-=======
     appendCanvas('lines', width, height);
->>>>>>> c88b2bec17b0e69f5ec9edf990aea032d0bfe4ba
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
     appendCanvas('char', width, height);
     ctxChar = document.getElementById('cvs-char').getContext('2d');
