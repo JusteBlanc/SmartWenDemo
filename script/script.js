@@ -5,7 +5,7 @@ var WHITE_DETECT = 150;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, linesYCoord;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxZoom, linesYCoord;
 
 function detectLines(){
     linesYCoord = new Array();
@@ -82,16 +82,12 @@ function binary(){
     ctxBinary.putImageData(imageData, 0, 0);
 }
 
-function enlargeWhiteLines(yTabs){
-    var imageData = ctxLines.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
-    var pixels = imageData.data;  
-    var nbPixels = pixels.length / 4;
-}
-
 function detectChar(yTabs){
     var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
+    var continuousChar = false;
+    var tempCoord = new Array();
     
     $.each(yTabs, function(yIndex,yTab) {
         for( var x = 0; x < img.width * ZOOM; x++)
@@ -109,6 +105,18 @@ function detectChar(yTabs){
                         isEmpty = false;
                     } 
                 }
+            }
+            if(!isEmpty && !continuousChar)
+            {
+                tempCoord[0] = x;
+                tempCoord[1] = yTab[0];
+                continuousChar = true;
+            }else if(isEmpty && continuousChar)
+            {
+                tempCoord[2] = x-tempCoord[0];
+                tempCoord[2] = yTab[1]-yTab[0];
+                continuousChar = false;
+                charCoord.push(tempCoord);
             }
             //Coloration ligne vide
             if(isEmpty)
@@ -138,6 +146,7 @@ function loadInputImg(){
         binary();
         detectLines();
         detectChar(linesYCoord);
+        loupe();
     }
 }
 
@@ -188,6 +197,7 @@ function initializeCanvas(width, height)
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
     appendCanvas('char', width, height);
     ctxChar = document.getElementById('cvs-char').getContext('2d');
+    
 }
 
 $(document).ready(function(){
