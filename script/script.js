@@ -1,15 +1,16 @@
 //Const
-var LINE_TRESHOLD = 0.30;
-var COLUMN_TRESHOLD = 0.30;
-var WHITE_DETECT = 240;
-var ZOOM = 2.0;
+var LINE_TRESHOLD = 0.12;
+var COLUMN_TRESHOLD = 0.0002;
+var WHITE_DETECT = 250;
+var BLACK_LIMIT = 160;
+var ZOOM = 1.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxLines, ctxChar, linesYCoord;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, linesYCoord;
 
 function detectLines(){
     linesYCoord = new Array();
-    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     var continuousText = false;
@@ -57,10 +58,39 @@ function detectLines(){
     return(linesYCoord);
 }
 
+function binary(){
+    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
+    
+    for (var y = 0; y < img.height * ZOOM; y++)
+    {
+        for(var x = 0; x < img.width * ZOOM; x++)
+        {
+            var index = (x + y * img.width * ZOOM) * 4;
+            if( pixels[index] < BLACK_LIMIT)
+            {
+                pixels[index] = 0; // r
+                pixels[index + 1] = 0; // v
+                pixels[index + 2] = 0; // b
+            }else{
+                pixels[index] = 255; // r
+                pixels[index + 1] = 255; // v
+                pixels[index + 2] = 255; // b
+            }
+        }
+    }
+    ctxBinary.putImageData(imageData, 0, 0);
+}
 
+function enlargeWhiteLines(yTabs){
+    var imageData = ctxLines.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixels = imageData.data;  
+    var nbPixels = pixels.length / 4;
+}
 
 function detectChar(yTabs){
-    var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     
@@ -99,11 +129,12 @@ function detectChar(yTabs){
 
 function loadInputImg(){
     img = new Image();
-    img.src = 'image/imerir.bmp';
+    img.src = 'image/imerir.jpg';
     img.onload = function()
     {
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
+        binary();
         detectLines();
         detectChar(linesYCoord);
     }
@@ -139,6 +170,7 @@ function initialize()
 {
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     ctxGray = document.getElementById('cvs-gray').getContext('2d');
+    ctxBinary = document.getElementById('cvs-binary').getContext('2d');
     ctxLines = document.getElementById('cvs-lines').getContext('2d');
     ctxChar = document.getElementById('cvs-char').getContext('2d');
 }
