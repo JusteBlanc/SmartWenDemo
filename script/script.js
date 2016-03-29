@@ -4,13 +4,15 @@ var WHITE_DETECT = 240;
 var ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxLines;
+var img, ctxInput, ctxGray, ctxLines, linesYCoord;
 
 function detectLines(){
+    linesYCoord = new Array();
     var imageData = ctxGray.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
-    
+    var continuousWhite = false;
+    var tempCoord = new Array();
     for (var y = 0; y < img.height * ZOOM; y++)
     {
         var isEmpty = true;
@@ -20,12 +22,22 @@ function detectLines(){
             var index = (x + y * img.width * ZOOM) * 4;
             if( pixels[index] < WHITE_DETECT)
             {
-                percentFilled += 1 / img.width * ZOOM;
+                 percentFilled += 1 / img.width * ZOOM;
                  if(percentFilled > LINE_TRESHOLD)
                  {
                      isEmpty = false;
                  } 
             }
+        }
+        if(isEmpty && !continuousWhite){
+            tempCoord = [y , ];
+            continuousWhite = true;
+        }
+        else if(!isEmpty && continuousWhite)
+        {
+            tempCoord[1] = y-1;
+            continuousWhite = false;
+            linesYCoord.push(tempCoord);
         }
         //Coloration ligne vide
         if(isEmpty)
@@ -40,6 +52,7 @@ function detectLines(){
         }
     }    
     ctxLines.putImageData(imageData, 0, 0);
+    return(linesYCoord);
 }
 
 function detectChar(y1,y2){
