@@ -191,10 +191,6 @@ function drawChar(){
     var offsetSquare = 1;
     
     $.each(detectionResults["charCoord"], function(charIndex,charCoord) {
-        console.log(charCoord);
-        
-        
-        
         for(var x = charCoord.x - offsetSquare; x <= charCoord.x + charCoord.w + offsetSquare; x++)
         {
             index = (x + (charCoord.y - offsetSquare) * img.width * ZOOM) * 4;
