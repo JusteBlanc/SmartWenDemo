@@ -6,25 +6,87 @@ var ZOOM = 1.0;
 var BILINEAR_ZOOM = 2;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, detectionResults;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxNeighbour, ctxSquareChar, detectionResults;
 var detectionResults = {
     "textYCoord": new Array(),
     "breakYCoord": new Array(),
     "charCoord": new Array()
 };
 
+function neighbourZoom(zoomValue)
+{
+    appendCanvas('neighbour' , img.width * zoomValue, img.height * zoomValue);
+    ctxNeighbour = document.getElementById('cvs-neighbour').getContext('2d');
+    
+    var srcData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var srcPixels = srcData.data;
+    var resultData = ctxNeighbour.getImageData(0, 0, img.width * ZOOM * zoomValue, img.height * ZOOM * zoomValue);
+    var resultPixels = resultData.data;
+    
+    if(zoomValue > 1)
+    {
+        //Copie des pixels non modifiés de l'image originale
+        for(var y = 0; y < img.height * ZOOM; y++){
+            for(var x=0; x < img.width * ZOOM; x++){
+                var srcPixelIndex = (x + y * img.width * ZOOM ) * 4;
+                var resultPixelIndex = (srcPixelIndex*zoomValue) + (y * zoomValue * 4 * ZOOM * img.width ) * (zoomValue-1);
+                
+                for (var i =0; i < 4; i++){
+                    resultPixels[resultPixelIndex + i] = srcPixels[srcPixelIndex + i];
+                }
+            }
+        }
+        
+        // Interpolation horizontale entre les pixels connus
+        for(var y = 0; y < img.height * ZOOM -1; y++){
+            for(var x=0; x < img.width * ZOOM -1; x++){
+                var indexLeft =  (((x + y * img.width * ZOOM ) * 4) * zoomValue) + (y * img.width * 4 * ZOOM * zoomValue )* (zoomValue-1) ;
+                for(var offsetIndexChar = 1; offsetIndexChar< zoomValue; offsetIndexChar++)
+                {
+                    var indexChar = indexLeft + offsetIndexChar*4;
+                    for(var i=0; i<4; i++){
+                        resultPixels[indexChar + i] = resultPixels[indexLeft + i];
+                    }
+                }
+            }
+        }
+        
+        //Interpolation verticale des pixels restants
+        var lineSize = img.width *zoomValue * ZOOM * 4;
+        for(var x=0; x < img.width * zoomValue * ZOOM; x++)
+        {
+            for(var y = 0; y < img.height * zoomValue * ZOOM; y+=zoomValue){
+                var indexTop = x*4 + y*lineSize;
+                var indexBot = indexTop + zoomValue * lineSize;
+                for(var offsetIndexChar = 1; offsetIndexChar< zoomValue; offsetIndexChar++)
+                {
+                    var indexChar = indexTop + offsetIndexChar * lineSize;
+                    for(var i = 0; i<4; i++)
+                    {
+                        resultPixels[indexChar + i] = resultPixels[indexTop + i];
+                    }
+                }
+                
+            }
+        }
+    }
+    
+    
+    ctxNeighbour.putImageData(resultData, 0, 0);
+}
+
 function bilinearInterpolationZoom(zoomValue)
 {
         
     //Ajout d'un comparatif
-    var cvs = document.createElement("canvas");
+    /*var cvs = document.createElement("canvas");
     cvs.id = 'cvs-canvas-zoom';
     cvs.setAttribute("width",img.width * zoomValue * ZOOM);
     cvs.setAttribute("height",img.height * zoomValue * ZOOM);
     document.getElementById("div-canvas-zoom").appendChild(cvs);
     var ctxComp = cvs.getContext('2d');
     ctxComp.drawImage(img, 0, 0, img.width * zoomValue * ZOOM, img.height * zoomValue * ZOOM);
-    
+    */
     
     appendCanvas('bilinear', img.width * zoomValue, img.height * zoomValue);
     ctxBilinear = document.getElementById('cvs-bilinear').getContext('2d');
@@ -251,7 +313,9 @@ function loadInputImg(){
         detectLines();
         detectChar(detectionResults["textYCoord"]);
         drawChar();
+        neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
+        
     }
 }
 
