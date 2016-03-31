@@ -308,7 +308,7 @@ function putImg(){
         neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
         
-        document.getElementById('cvs-spacesZoom').addEventListener('mousemove', mousemovement, false);
+        //document.getElementById('cvs-spacesZoom').addEventListener('mousemove', mousemovement, false);
         
         document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
         document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRect, false);
