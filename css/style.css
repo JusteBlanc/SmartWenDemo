@@ -1,0 +1,15 @@
+
+
+.cvs-container {
+    margin-bottom: 40px;
+    border-style: solid;
+    border-color: gray;
+    border-top: 0px;
+    border-right: 0px;
+    border-bottom: 0px; 
+    padding-right: 30px;
+}
+
+.m-top-30 {
+    margin-top: 30px;
+}

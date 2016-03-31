@@ -3,7 +3,7 @@ var LINE_TRESHOLD = 0.12;
 var COLUMN_TRESHOLD = 0.0002;
 var WHITE_DETECT = 150;
 var ZOOM = 1.0;
-var BILINEAR_ZOOM = 4.0;
+var BILINEAR_ZOOM = 2;
 
 //Global
 var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, detectionResults;

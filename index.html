@@ -1,43 +1,69 @@
 <!DOCTYPE html>
 <html>
+    
    <head>
       <title>SmartWen Demo</title>
+      
+      <link href="css/bootstrap.css" rel="stylesheet" media="all" type="text/css">
+      <link href="css/style.css" rel="stylesheet" media="all" type="text/css">
+      
       <script src="script/jquery-2.2.2.min.js"></script>
+      <script src="script/bootstrap.min.js"></script>
       <script src="script/ocrad.js"></script>
+      
+      
       <script src="script/script.js"></script>
    </head>
-   <body>   
-     <div class="cvs-container" id="div-input">
-         <h2>Input</h2>
-     </div>
-     
-     <div class="cvs-container" id="div-gray">
-         <h2>Gray</h2>
-     </div>
-     
-     <div class="cvs-container" id="div-binary">
-         <h2>Binary</h2>
-     </div>
-     
-     
-     <div class="cvs-container" id="div-lines">
-         <h2>Lines Detection</h2>
-     </div>
-     
-     <div class="cvs-container" id="div-char">
-        <h2>Char Detection</h2>
-     </div>
-     
-     <div class="cvs-container" id="div-bilinear">
-        <h2>Bilinear Interpolation</h2>
-     </div>
-     
-     <div class="cvs-container" id="div-canvas-zoom">
-     </div>
-     
-     <div class="cvs-container" id="div-squareChar">
-        <h2>Char square</h2>
-     
+   
+   <body>
+     <div class="col-lg-12">
+        <h1>Demo "Proof Of Concept" SmartWen</h1>
+        <row>
+            <h2>Color processing</h2>
+            <div class="col-lg-12">
+                <div class="cvs-container col-md-4" id="div-input">
+                    <h3>Input</h3>
+                </div>
+            
+                <div class="cvs-container col-md-4" id="div-gray">
+                    <h3>Gray</h3>
+                </div>
+                
+                <div class="cvs-container col-md-4" id="div-binary">
+                    <h3>Binary</h3>
+                </div>
+            </div>
+        </row>
+        
+        <row>
+            <h2>Detection</h2>
+            <div class="col-lg-12">
+                <div class="cvs-container col-md-4" id="div-lines">
+                    <h3>Lines</h3>
+                </div>
+            
+                <div class="cvs-container col-md-4" id="div-char">
+                    <h3>Spaces</h3>
+                </div>
+                
+                <div class="cvs-container col-md-4" id="div-squareChar">
+                    <h3>Chars</h3>
+                </div>
+            </div>
+        </row>
+        
+        </row>
+            <h2>Zoom</h2>
+            <div class="col-lg-12">
+                <div class="cvs-container col-md-6" id="div-bilinear">
+                    <h3>Bilinear Interpolation</h3>
+                </div>
+                
+                <div class="cvs-container col-md-6" id="div-canvas-zoom">
+                    <h3>Canvas zoom</h3>
+                </div>
+            </div>
+        </row>
      </div>
    </body>
 </html>
