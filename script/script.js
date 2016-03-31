@@ -1,6 +1,6 @@
 //Const
-var LINE_TRESHOLD = 0.12;
-var COLUMN_TRESHOLD = 0.0002;
+var LINE_TRESHOLD = 0.02;
+var COLUMN_TRESHOLD = 0.003;
 var WHITE_DETECT = 150;
 var ZOOM = 2.0;
 var BILINEAR_ZOOM = 2.0;
@@ -12,6 +12,10 @@ var detectionResults = {
     "breakYCoord": new Array(),
     "charCoord": new Array()
 };
+var rect = {
+    "x": 0,
+    "y": 0
+}
 
 function neighbourZoom(zoomValue)
 {
@@ -302,11 +306,17 @@ function loadInputImg(){
         neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
         document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
+        document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRect, false);
         function readMouseMove(e){
-            linesZoom(e.clientX, e.clientY /*- 350*/, 250, 10)
-            console.log(e.clientY);
+            linesZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
+            
         }
     }
+}
+
+function calcRect(){
+    rect = document.getElementById('cvs-linesZoom').getBoundingClientRect();
+    console.log(rect.left);
 }
 
 function drawChar(){
@@ -390,7 +400,6 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
                             pixelsWrite[index + 2] = pixelsData[indexData + 2];
                         }
                     }
-                    
                 }
             }
         }else{
@@ -407,7 +416,7 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
                 var indexWrite = (x + y * img.width * ZOOM) * 4
                 if((y + Math.round(nbLinesChange / 2) * vZoom) < (zoomBoxSize + yZoomCorner))
                 {
-                    var indexData = (x + (y + Math.round(nbLinesChange /2) * vZoom) * img.width * ZOOM) * 4
+                    var indexData = (x + (y + nbLinesChange / 2 * vZoom) * img.width * ZOOM) * 4
                     pixelsWrite[indexWrite] = pixelsWrite[indexData];
                     pixelsWrite[indexWrite + 1] = pixelsWrite[indexData + 1];
                     pixelsWrite[indexWrite + 2] = pixelsWrite[indexData + 2];
@@ -515,7 +524,6 @@ function initializeCanvas(width, height)
     ctxSquareChar = document.getElementById('cvs-squareChar').getContext('2d');
     appendCanvas('linesZoom', width, height);
     ctxLinesZoom = document.getElementById('cvs-linesZoom').getContext('2d');
-    
 }
 
 $(document).ready(function(){
