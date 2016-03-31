@@ -318,6 +318,7 @@ function loadInputImg(){
         document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
         function readMouseMove(e){
             linesZoom(e.clientX, e.clientY - 350, 250, 10)
+            console.log(e.clientY);
         }
     }
 }
