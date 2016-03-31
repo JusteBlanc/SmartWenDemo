@@ -25,8 +25,11 @@
             Those processes are used in OCR (Optical Character Recognition), so we used the same approach. We simplify the classic OCR process, because we don't need to know which characters are in the documents, but we only need to know their positions.</br>
             All processes described bellow are programmed in JavaScript and their implementations are available in the "script.js" file of this page, without using any external libraries</p>
         </div>
+        
         <row>
             <div class="col-lg-12">
+                <input id = "imgUrl" type="text" name="imgUrl">
+                <input id ="submitImg" type="submit" value="Submit" onclick="onSubmit()">
                 <h2>#1 Color processing</h2>
                 <p>
                 Firstable, we need a binary color picture. This format will help to improve characters detection in step 2.</br>

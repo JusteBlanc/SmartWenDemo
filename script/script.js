@@ -290,9 +290,14 @@ function detectChar(yTabs){
     ctxChar.putImageData(imageData, 0, 0);
 }
 
-function loadInputImg(){
+function onSubmit(){
+    loadInputImg(document.getElementById('imgUrl').value);
+}
+
+
+function loadInputImg(url){
     img = new Image();
-    img.src = 'image/imerir.jpg';
+    img.src = 'image/' + url;
     img.onload = function()
     {
         initializeCanvas(img.width, img.height);
@@ -615,6 +620,6 @@ function initializeCanvas(width, height){
 }
 
 $(document).ready(function(){
-    loadInputImg();
+    loadInputImg('imerir.jpg');
     //ocradjs();
 });
