@@ -6,7 +6,7 @@ var ZOOM = 2.0;
 var BILINEAR_ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, ctxNeighbour, ctxLinesZoom, detectionResults;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, ctxNeighbour, ctxLinesZoom, detectionResults, ctxSpacesZoom;
 var detectionResults = {
     "textYCoord": new Array(),
     "breakYCoord": new Array(),
@@ -290,7 +290,7 @@ function detectChar(yTabs){
     ctxChar.putImageData(imageData, 0, 0);
 }
 
-function loadInputImg(){
+function putImg(){
     img = new Image();
     img.src = 'image/imerir.jpg';
     img.onload = function()
@@ -298,6 +298,8 @@ function loadInputImg(){
         initializeCanvas(img.width, img.height);
         
         ctxInput.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
+        ctxLinesZoom.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
+        ctxSpacesZoom.drawImage(img, 0, 0, img.width * ZOOM, img.height * ZOOM);
         convertToGray();
         binary();
         detectLines();
@@ -305,14 +307,18 @@ function loadInputImg(){
         drawChar();
         neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
+        
+        document.getElementById('cvs-spacesZoom').addEventListener('mousemove', mousemovement, false);
+        
         document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
         document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRect, false);
         function readMouseMove(e){
             linesZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
-            
         }
     }
 }
+
+
 
 function calcRect(){
     rect = document.getElementById('cvs-linesZoom').getBoundingClientRect();
@@ -508,8 +514,7 @@ function appendCanvas(canvasName, width, height, useZoom = true)
 
 }
 
-function initializeCanvas(width, height)
-{
+function initializeCanvas(width, height){
     appendCanvas("input", width, height);
     ctxInput = document.getElementById('cvs-input').getContext('2d');
     appendCanvas("gray", width, height);        
@@ -524,9 +529,11 @@ function initializeCanvas(width, height)
     ctxSquareChar = document.getElementById('cvs-squareChar').getContext('2d');
     appendCanvas('linesZoom', width, height);
     ctxLinesZoom = document.getElementById('cvs-linesZoom').getContext('2d');
+    appendCanvas('spacesZoom', width, height);
+    ctxSpacesZoom = document.getElementById('cvs-spacesZoom').getContext('2d');
 }
 
 $(document).ready(function(){
-    loadInputImg();
+    putImg();
     //ocradjs();
 });
