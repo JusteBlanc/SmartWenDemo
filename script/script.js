@@ -290,9 +290,14 @@ function detectChar(yTabs){
     ctxChar.putImageData(imageData, 0, 0);
 }
 
-function loadInputImg(){
+function onSubmit(){
+    loadInputImg(document.getElementById('imgUrl').value);
+}
+
+
+function loadInputImg(url){
     img = new Image();
-    img.src = 'image/imerir.jpg';
+    img.src = 'image/' + url;
     img.onload = function()
     {
         initializeCanvas(img.width, img.height);
@@ -310,7 +315,7 @@ function loadInputImg(){
         document.getElementById('cvs-spacesZoom').onmousemove = readMouseMoveChar;
         document.getElementById('cvs-spacesZoom').addEventListener('mouseover', calcRectChar, false);
         function readMouseMoveChar(e){
-            charZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
+            charZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 3);
         }
         document.getElementById('cvs-linesZoom').onmousemove = readMouseMoveLines;
         document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRectLines, false);
@@ -654,6 +659,6 @@ function initializeCanvas(width, height){
 }
 
 $(document).ready(function(){
-    loadInputImg();
+    loadInputImg('imerir.jpg');
     //ocradjs();
 });
