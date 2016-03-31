@@ -75,16 +75,6 @@ function neighbourZoom(zoomValue)
 
 function bilinearInterpolationZoom(zoomValue)
 {
-    //Ajout d'un comparatif
-    /*var cvs = document.createElement("canvas");
-    cvs.id = 'cvs-canvas-zoom';
-    cvs.setAttribute("width",img.width * zoomValue * ZOOM);
-    cvs.setAttribute("height",img.height * zoomValue * ZOOM);
-    document.getElementById("div-canvas-zoom").appendChild(cvs);
-    var ctxComp = cvs.getContext('2d');
-    ctxComp.drawImage(img, 0, 0, img.width * zoomValue * ZOOM, img.height * zoomValue * ZOOM);
-    */
-    
     appendCanvas('bilinear', img.width * zoomValue, img.height * zoomValue);
     ctxBilinear = document.getElementById('cvs-bilinear').getContext('2d');
     var srcData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
@@ -140,7 +130,6 @@ function bilinearInterpolationZoom(zoomValue)
         ctxBilinear.putImageData(resultData, 0, 0);
     }
 }
-
 
 function detectLines(){
     detectionResults["textYCoord"] = new Array();
@@ -485,8 +474,6 @@ function convertToGray()
     
     ctxGray.putImageData(imageData, 0, 0);
 }
-
-
 
 function ocradjs()
 {
