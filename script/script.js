@@ -291,9 +291,9 @@ function detectChar(yTabs){
 }
 
 function onSubmit(){
+    $("canvas").remove();
     loadInputImg(document.getElementById('imgUrl').value);
 }
-
 
 function loadInputImg(url){
     img = new Image();
