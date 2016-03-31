@@ -388,40 +388,40 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
             }
         }
     }
-            for(var y = yZoomCorner; y < yZoomCorner + zoomBoxSize - nbLinesChange * vZoom ; y++)
+    for(var y = yZoomCorner; y < yZoomCorner + zoomBoxSize - nbLinesChange * vZoom ; y++)
+    {
+        $.each(detectionResults["breakYCoord"], function(breakIndex,breakCoord){
+            var breakCenter = Math.round((breakCoord[0]+breakCoord[1])/2);
+            if(breakCenter == y)
             {
-                $.each(detectionResults["breakYCoord"], function(breakIndex,breakCoord){
-                    var breakCenter = Math.round((breakCoord[0]+breakCoord[1])/2);
-                    if(breakCenter == y)
-                    {
-                        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
-                        {
-                            for (var i = 0; i<vZoom; i++)
-                            {   
-                                if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
-                                {
-                                var index = (x + (y + i + nbLinesChange * vZoom) * img.width * ZOOM) * 4
-                                    pixelsWrite[index] = 255;
-                                    pixelsWrite[index + 1] = 255;
-                                    pixelsWrite[index + 2] = 255;
-                                }                          
-                            }
-                        }
-                        nbLinesChange ++;
-                    }
-                }, this);
                 for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
                 {
-                    if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
-                    {
-                        var indexData = (x + y * img.width * ZOOM) * 4;
-                        var indexWrite = (x + (y + nbLinesChange * vZoom) * img.width * ZOOM) * 4;
-                        pixelsWrite[indexWrite] = pixelsData[indexData];
-                        pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
-                        pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
+                    for (var i = 0; i<vZoom; i++)
+                    {   
+                        if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                        {
+                        var index = (x + (y + i + nbLinesChange * vZoom) * img.width * ZOOM) * 4
+                            pixelsWrite[index] = 255;
+                            pixelsWrite[index + 1] = 255;
+                            pixelsWrite[index + 2] = 255;
+                        }                          
                     }
                 }
+                nbLinesChange ++;
             }
+        }, this);
+        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        {
+            if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+            {
+                var indexData = (x + y * img.width * ZOOM) * 4;
+                var indexWrite = (x + (y + nbLinesChange * vZoom) * img.width * ZOOM) * 4;
+                pixelsWrite[indexWrite] = pixelsData[indexData];
+                pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
+                pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
+            }
+        }
+    }
    /* for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner /*+ Math.round(nbLinesChange / 2) * vZoom*//*); y++)
     {
         for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
@@ -477,6 +477,98 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
         }
     } 
     ctxLinesZoom.putImageData(imageWrite, 0, 0);
+}
+
+function charZoom(xZoomCenter, yZoomCenter, zoomBoxSize, hZoom)
+{
+    var imageData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageWrite = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixelsData = imageData.data;  
+    var pixelsWrite = imageWrite.data;  
+    var nbPixels = pixelsData.length / 4;
+    var xZoomCorner = xZoomCenter - zoomBoxSize / 2;
+    var yZoomCorner = yZoomCenter - zoomBoxSize / 2;
+    var nbCharChange = 0;
+    for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner); y++)
+    {
+        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        {
+            if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+            {
+                var index = (x + y * img.width * ZOOM) * 4;
+                pixelsWrite[index] = 255;
+                pixelsWrite[index + 1] = 255;
+                pixelsWrite[index + 2] = 255;
+            }
+        }
+    }
+    $.each(detectionResults["textYCoord"], function(textIndex,textCoord){
+        if(textCoord[0] > yZoomCorner && textCoord[1] < yZoomCorner + zoomBoxSize){
+            for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+            {
+                $.each(detectionResults["charCoord"], function(charIndex,charCoord){
+                    if(charCoord.x-1 == x){
+                        for(var y = textCoord[0]; y < textCoord[1]; y++)
+                        {
+                            for (var i = 0; i < hZoom; i++)
+                            {   
+                                if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                                {
+                                    var index = (x + i + nbCharChange * vZoom + y * img.width * ZOOM) * 4
+                                    pixelsWrite[index] = 255;
+                                    pixelsWrite[index + 1] = 255;
+                                    pixelsWrite[index + 2] = 255;
+                                }                          
+                            }
+                        }
+                        nbCharChange ++;
+                    }
+                },this);
+                for(var y = textCoord[0]; y < textCoord[1]; y++)
+                {
+                    var indexData = (x + y * img.width * ZOOM) * 4;
+                    var indexWrite = (x + (y + nbCharChange * hZoom) * img.width * ZOOM) * 4;
+                    pixelsWrite[indexWrite] = pixelsData[indexData];
+                    pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
+                    pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
+                }
+            }
+        }
+    },this);
+
+    for(var x = xZoomCorner; x <= (xZoomCorner + zoomBoxSize); x++)
+    {
+        if (x < img.width*ZOOM && x > 0)
+        {
+            index = (x + (yZoomCorner) * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+            index = (x + (yZoomCorner + zoomBoxSize ) * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+    }
+    
+    for(var y = yZoomCorner ; y <= (yZoomCorner + zoomBoxSize ); y++)
+    {
+        if(xZoomCorner > 0)
+        {
+            index = (xZoomCorner + y * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+        if(xZoomCorner + zoomBoxSize < img.width * ZOOM)
+        {
+            index = (xZoomCorner + zoomBoxSize + y * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+    } 
+    ctxSpacesZoom.putImageData(imageWrite, 0, 0);
 }
 
 function convertToGray()
