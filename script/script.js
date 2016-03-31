@@ -307,20 +307,25 @@ function putImg(){
         drawChar();
         neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
-        
-        document.getElementById('cvs-spacesZoom').addEventListener('mousemove', mousemovement, false);
-        
-        document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
-        document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRect, false);
-        function readMouseMove(e){
+        document.getElementById('cvs-spacesZoom').onmousemove = readMouseMoveChar;
+        document.getElementById('cvs-spacesZoom').addEventListener('mouseover', calcRectChar, false);
+        function readMouseMoveChar(e){
+            charZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
+        }
+        document.getElementById('cvs-linesZoom').onmousemove = readMouseMoveLines;
+        document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRectLines, false);
+        function readMouseMoveLines(e){
             linesZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
         }
     }
 }
 
+function calcRectChar(){
+    rect = document.getElementById('cvs-spacesZoom').getBoundingClientRect();
+    console.log(rect.left);
+}
 
-
-function calcRect(){
+function calcRectLines(){
     rect = document.getElementById('cvs-linesZoom').getBoundingClientRect();
     console.log(rect.left);
 }
@@ -498,34 +503,41 @@ function charZoom(xZoomCenter, yZoomCenter, zoomBoxSize, hZoom)
         }
     }
     $.each(detectionResults["textYCoord"], function(textIndex,textCoord){
-        if(textCoord[0] > yZoomCorner && textCoord[1] < yZoomCorner + zoomBoxSize){
-            for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        if(textCoord[1] > yZoomCorner && textCoord[0] < yZoomCorner + zoomBoxSize){
+            nbCharChange = 0;
+            for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize) - nbCharChange * hZoom; x++)
             {
                 $.each(detectionResults["charCoord"], function(charIndex,charCoord){
-                    if(charCoord.x-1 == x){
+                        if(charCoord.x-1 == x){
                         for(var y = textCoord[0]; y < textCoord[1]; y++)
                         {
-                            for (var i = 0; i < hZoom; i++)
-                            {   
-                                if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
-                                {
-                                    var index = (x + i + nbCharChange * vZoom + y * img.width * ZOOM) * 4
-                                    pixelsWrite[index] = 255;
-                                    pixelsWrite[index + 1] = 255;
-                                    pixelsWrite[index + 2] = 255;
-                                }                          
+                            if(charCoord.y == y){
+                                for (var i = 0; i < hZoom; i++)
+                                {   
+                                    if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                                    {
+                                        var index = (x + i + nbCharChange * hZoom + y * img.width * ZOOM) * 4
+                                        pixelsWrite[index] = 255;
+                                        pixelsWrite[index + 1] = 255;
+                                        pixelsWrite[index + 2] = 255;
+                                    }                          
+                                }
+                                nbCharChange ++;
                             }
                         }
-                        nbCharChange ++;
+                        
                     }
                 },this);
                 for(var y = textCoord[0]; y < textCoord[1]; y++)
                 {
-                    var indexData = (x + y * img.width * ZOOM) * 4;
-                    var indexWrite = (x + (y + nbCharChange * hZoom) * img.width * ZOOM) * 4;
-                    pixelsWrite[indexWrite] = pixelsData[indexData];
-                    pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
-                    pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
+                    if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                    {
+                        var indexData = (x + y * img.width * ZOOM) * 4;
+                        var indexWrite = (x + nbCharChange * hZoom + y * img.width * ZOOM) * 4;
+                        pixelsWrite[indexWrite] = pixelsData[indexData];
+                        pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
+                        pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
+                    }
                 }
             }
         }
