@@ -17,61 +17,67 @@
    
    <body>
      <div class="col-lg-12">
-        <h1>Demo "Proof Of Concept" SmartWen</h1>
+         <div class="jumbotron">
+            <h1>Demo "Proof Of Concept" SmartWen</h1>
+            <p>SmartWen is a mobile app, designed for visually impaired, helping them with a tool making documents more readable.</br>
+            This page describe some processes, that will be used in the final app.</br>
+            Those processes are used in OCR (Optical Character Recognition), so we used the same approach. We simplify the classic OCR process, because we don't need to know which characters are in the documents, but we only need to know their positions.</br>
+            All processes described bellow are programmed in JavaScript and their implementations are available in the "script.js" file of this page, without using any external libraries</p>
+        </div>
         <row>
-                <p>SmartWen is a mobile app, designed for visually impaired, helping them with a tool making documents more readable.</br>
-                This page describe some processes, that will be used in the final app.</br>
-                Those processes are used in OCR (Optical Character Recognition), so we used the same approach. We simplify the classic OCR process, because we don't need to know which characters are in the documents, but we only need to know their positions.</br>
-                All processes described bellow are programmed in JavaScript and their implementations are available in the "script.js" file of this page, without using any external libraries</p>
-        </row>
-        <row>
-            <h2>#1 Color processing</h2>
-            <p>Firstable, we need a binary color picture. This format will help to improve character detection in step 2.</br>
-            In order to do that, we convert the input image in a grayscale picture, and with a treshold parameter, we convert it into binary picture.</p>
             <div class="col-lg-12">
+                <h2>#1 Color processing</h2>
+                <p>Firstable, we need a binary color picture. This format will help to improve characters detection in step 2.</br>
+                In order to do that, we convert the input image in a grayscale picture, and with a treshold parameter, we convert it into binary picture.</br>
+                The formula to convert in grayscale used here is: GRAY = 0.299 x RED + 0.587 x GREEN + 0.114 x BLUE.</br>
+                Finally, the "treshold" used in binary convertion is actually set in the script, but it will need to be calculate for the final app.</br>
+                A last step will be to opposed binary colors if the document is write in light on a dark background.
+                </p>
                 <div class="cvs-container col-md-4" id="div-input">
                     <h3>Input</h3>
                 </div>
-            
                 <div class="cvs-container col-md-4" id="div-gray">
                     <h3>Gray</h3>
                 </div>
-                
                 <div class="cvs-container col-md-4" id="div-binary">
                     <h3>Binary</h3>
                 </div>
-               
             </div>
             
         </row>
-        
         <row>
-            <h2>#2 Detection</h2>
             <div class="col-lg-12">
+                <h2>#2 Detection</h2>
+                <p>
+                The aim of the detection process, is to find all white spaces and characters positions. Actually, we do that with a simple algorithm wich find white lines in the document. Once we know where the text line are, we simply used the same process to find white space between separate characters. Once we have those informations, we can easly determinate characters coordinates.</br></br>
+                <b>Note:</b> In order to do a efficient character detection, a preliminar process of de-skewing is needed. This can be done using a algorithm based on "Hough Transformation". As we actually didn't make it work, we use an original de-skew picture.<br/>
+                In a second time, we apply our algorithm of "white detection" on the entire frame. This can be improve with another preliminary process wich will detect text area, so the algorithm won't be used on logo or images contains in the document. </br>
+                Those two processes will be done in further developpements.
+                </p>
+                
                 <div class="cvs-container col-md-4" id="div-lines">
                     <h3>Lines</h3>
                 </div>
-            
                 <div class="cvs-container col-md-4" id="div-char">
                     <h3>Spaces</h3>
                 </div>
-                
                 <div class="cvs-container col-md-4" id="div-squareChar">
                     <h3>Chars</h3>
                 </div>
             </div>
         </row>
-        
         </row>
-            <h2>#3 Zoom</h2>
             <div class="col-lg-12">
+                <h2>#3 Zoom</h2>
+                <div class="cvs-container col-md-6" id="div-neighbour">
+                    <h3>Neighbour Interpolation</h3>
+                </div>
                 <div class="cvs-container col-md-6" id="div-bilinear">
                     <h3>Bilinear Interpolation</h3>
                 </div>
                 
-                <div class="cvs-container col-md-6" id="div-canvas-zoom">
-                    <h3>Canvas zoom</h3>
-                </div>
+                
+            </div>
             </div>
         </row>
      </div>
