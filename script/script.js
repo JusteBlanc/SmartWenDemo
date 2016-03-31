@@ -290,7 +290,7 @@ function detectChar(yTabs){
     ctxChar.putImageData(imageData, 0, 0);
 }
 
-function putImg(){
+function loadInputImg(){
     img = new Image();
     img.src = 'image/imerir.jpg';
     img.onload = function()
@@ -685,6 +685,6 @@ function initializeCanvas(width, height){
 }
 
 $(document).ready(function(){
-    putImg();
+    loadInputImg();
     //ocradjs();
 });
