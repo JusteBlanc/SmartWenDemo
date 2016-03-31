@@ -2,11 +2,11 @@
 var LINE_TRESHOLD = 0.12;
 var COLUMN_TRESHOLD = 0.0002;
 var WHITE_DETECT = 150;
-var ZOOM = 1.0;
-var BILINEAR_ZOOM = 4.0;
+var ZOOM = 2.0;
+var BILINEAR_ZOOM = 2.0;
 
 //Global
-var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, detectionResults;
+var img, ctxInput, ctxGray, ctxBinary, ctxLines, ctxChar, ctxBilinear, ctxSquareChar, ctxLinesZoom, detectionResults;
 var detectionResults = {
     "textYCoord": new Array(),
     "breakYCoord": new Array(),
@@ -252,11 +252,15 @@ function loadInputImg(){
         detectChar(detectionResults["textYCoord"]);
         drawChar();
         bilinearInterpolationZoom(BILINEAR_ZOOM);
+        document.getElementById('cvs-linesZoom').onmousemove = readMouseMove;
+        function readMouseMove(e){
+            linesZoom(e.clientX, e.clientY - 350, 250, 10)
+        }
     }
 }
 
 function drawChar(){
-    var imageData = ctxBinary.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
     var pixels = imageData.data;  
     var nbPixels = pixels.length / 4;
     var index;
@@ -290,6 +294,117 @@ function drawChar(){
     ctxSquareChar.putImageData(imageData, 0, 0);
 }
 
+function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
+{
+    var imageData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var imageWrite = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
+    var pixelsData = imageData.data;  
+    var pixelsWrite = imageWrite.data;  
+    var nbPixels = pixelsData.length / 4;
+    var xZoomCorner = xZoomCenter - zoomBoxSize / 2;
+    var yZoomCorner = yZoomCenter - zoomBoxSize / 2;
+    var nbLinesChange;
+    for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner); y++)
+    {
+        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        {
+            if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+            {
+                var index = (x + y * img.width * ZOOM) * 4;
+                pixelsWrite[index] = 255;
+                pixelsWrite[index + 1] = 255;
+                pixelsWrite[index + 2] = 255;
+            }
+        }
+    }
+    $.each(detectionResults["breakYCoord"], function(breakIndex,breakCoord){
+        var breakCenter = Math.round((breakCoord[0]+breakCoord[1])/2);
+        if(breakCenter + Math.round(breakIndex / 2) * vZoom < (zoomBoxSize + yZoomCorner) && breakCenter > yZoomCorner)
+        {
+            for(var y = breakCenter; y < (zoomBoxSize + yZoomCorner - Math.round(breakIndex / 2) * vZoom); y++)
+            {
+                for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+                {
+                    if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                    {
+                        var index = (x + (y + breakIndex * vZoom) * img.width * ZOOM) * 4;
+                        if(y < (breakCenter + vZoom))
+                        {
+                            pixelsWrite[index] = 255;
+                            pixelsWrite[index + 1] = 255;
+                            pixelsWrite[index + 2] = 255;
+                        }else{
+                            var indexData = (x + (y-vZoom) * img.width * ZOOM) * 4;
+                            pixelsWrite[index] = pixelsData[indexData];
+                            pixelsWrite[index + 1] = pixelsData[indexData + 1];
+                            pixelsWrite[index + 2] = pixelsData[indexData + 2];
+                        }
+                    }
+                    
+                }
+            }
+        }else{
+            breakIndex--;
+        }
+        nbLinesChange = breakIndex;
+    }, this);
+    for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner + Math.round(nbLinesChange / 2) * vZoom); y++)
+    {
+        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        {
+            if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+            {
+                var indexWrite = (x + y * img.width * ZOOM) * 4
+                if((y + Math.round(nbLinesChange / 2) * vZoom) < (zoomBoxSize + yZoomCorner))
+                {
+                    var indexData = (x + (y + Math.round(nbLinesChange /2) * vZoom) * img.width * ZOOM) * 4
+                    pixelsWrite[indexWrite] = pixelsWrite[indexData];
+                    pixelsWrite[indexWrite + 1] = pixelsWrite[indexData + 1];
+                    pixelsWrite[indexWrite + 2] = pixelsWrite[indexData + 2];
+             }else{
+                    pixelsWrite[indexWrite] = 255;
+                    pixelsWrite[indexWrite + 1] = 255;
+                    pixelsWrite[indexWrite + 2] = 255;
+                }
+            }
+        }
+    }
+    
+    for(var x = xZoomCorner; x <= (xZoomCorner + zoomBoxSize); x++)
+    {
+        if (x < img.width*ZOOM && x > 0)
+        {
+            index = (x + (yZoomCorner) * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+            index = (x + (yZoomCorner + zoomBoxSize /*- nbLinesChange / 2 * vZoom*/) * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+    }
+    
+    for(var y = yZoomCorner ; y <= (yZoomCorner + zoomBoxSize /*- nbLinesChange / 2 * vZoom*/); y++)
+    {
+        if(xZoomCorner > 0)
+        {
+            index = (xZoomCorner + y * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+        if(xZoomCorner + zoomBoxSize < img.width * ZOOM)
+        {
+            index = (xZoomCorner + zoomBoxSize + y * img.width * ZOOM) * 4;
+            pixelsWrite[index] = 255;
+            pixelsWrite[index + 1] = 0;
+            pixelsWrite[index + 2] = 0;
+        }
+    } 
+    ctxLinesZoom.putImageData(imageWrite, 0, 0);
+}
+
 function convertToGray()
 {
     var imageData = ctxInput.getImageData(0, 0, img.width * ZOOM, img.height * ZOOM);
@@ -309,6 +424,8 @@ function convertToGray()
     
     ctxGray.putImageData(imageData, 0, 0);
 }
+
+
 
 function ocradjs()
 {
@@ -340,6 +457,8 @@ function initializeCanvas(width, height)
     ctxChar = document.getElementById('cvs-char').getContext('2d');
     appendCanvas('squareChar', width, height);
     ctxSquareChar = document.getElementById('cvs-squareChar').getContext('2d');
+    appendCanvas('linesZoom', width, height);
+    ctxLinesZoom = document.getElementById('cvs-linesZoom').getContext('2d');
     
 }
 
