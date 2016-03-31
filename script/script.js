@@ -307,19 +307,12 @@ function loadInputImg(){
         drawChar();
         neighbourZoom(BILINEAR_ZOOM);
         bilinearInterpolationZoom(BILINEAR_ZOOM);
-        document.getElementById('cvs-spacesZoom').onmousemove = readMouseMoveChar;
-        document.getElementById('cvs-spacesZoom').addEventListener('mouseover', calcRectChar, false);
-        function readMouseMoveChar(e){
-            charZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
-        }
-        document.getElementById('cvs-linesZoom').onmousemove = readMouseMoveLines;
-        document.getElementById('cvs-linesZoom').addEventListener("mouseover", calcRectLines, false);
-        function readMouseMoveLines(e){
-            linesZoom(e.clientX - Math.round(rect.left), e.clientY - Math.round(rect.top), 300, 10);
-        }
+
+        document.getElementById('cvs-spacesZoom').addEventListener('mousemove', mouseMovementSpaces, false);
+        document.getElementById('cvs-linesZoom').addEventListener('mousemove', mouseMovementLines, false);
     }
 }
-/*
+
 function getOffset(e) {
     var cx = 0;
     var cy = 0;
@@ -332,7 +325,8 @@ function getOffset(e) {
     return { top: cy, left: cx };
 }
 
-function mousemovement(e){
+function mouseMovementSpaces(e){
+    var x,y;
     if(e.offsetX || e.offsetY) {
         x = e.pageX - getOffset(document.getElementById('cvs-spacesZoom')).left - window.pageXOffset;
         y = e.pageY - getOffset(document.getElementById('cvs-spacesZoom')).top - window.pageYOffset;
@@ -340,14 +334,22 @@ function mousemovement(e){
     else if(e.layerX || e.layerY) {
         x = (e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft) - getOffset(document.getElementById('cvs-spacesZoom')).left - window.pageXOffset;
         y = (e.clientY + document.body.scrollTop + document.documentElement.scrollTop) - getOffset(document.getElementById('cvs-spacesZoom')).top;
-    }  
-    drawZoomRect(x,y, 200);
-}*/
-function calcRectChar(){
-    rect = document.getElementById('cvs-spacesZoom').getBoundingClientRect();
-    console.log(rect.left);
+    }
+    charZoom(x,y, 200, 5);
 }
 
+function mouseMovementLines(e){
+    var x,y;
+    if(e.offsetX || e.offsetY) {
+        x = e.pageX - getOffset(document.getElementById('cvs-linesZoom')).left - window.pageXOffset;
+        y = e.pageY - getOffset(document.getElementById('cvs-linesZoom')).top - window.pageYOffset;
+    }
+    else if(e.layerX || e.layerY) {
+        x = (e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft) - getOffset(document.getElementById('cvs-linesZoom')).left - window.pageXOffset;
+        y = (e.clientY + document.body.scrollTop + document.documentElement.scrollTop) - getOffset(document.getElementById('cvs-linesZoom')).top;
+    }
+    linesZoom(x,y, 200, 10);
+}
 
 function getTopLeftZoom(x,y,size){
     var topLeft = {x:0,y:0};
@@ -381,12 +383,6 @@ function drawZoomRect(topLeft, size, context){
     context.lineTo(topLeft.x+size,topLeft.y);
     context.lineTo(topLeft.x,topLeft.y);
     context.stroke();
-}
-
-
-function calcRectLines(){
-    rect = document.getElementById('cvs-linesZoom').getBoundingClientRect();
-    console.log(rect.left);
 }
 
 function drawChar(){
@@ -431,8 +427,6 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
     var pixelsData = imageData.data;  
     var pixelsWrite = imageWrite.data;  
     var nbPixels = pixelsData.length / 4;
-    /*var xZoomCorner = xZoomCenter - zoomBoxSize / 2;
-    var yZoomCorner = yZoomCenter - zoomBoxSize / 2;*/
     var zoomCorner = getTopLeftZoom(xZoomCenter,yZoomCenter,zoomBoxSize);
     
     var nbLinesChange = 0;
@@ -498,12 +492,11 @@ function charZoom(xZoomCenter, yZoomCenter, zoomBoxSize, hZoom)
     var pixelsData = imageData.data;  
     var pixelsWrite = imageWrite.data;  
     var nbPixels = pixelsData.length / 4;
-    var xZoomCorner = xZoomCenter - zoomBoxSize / 2;
-    var yZoomCorner = yZoomCenter - zoomBoxSize / 2;
+    var zoomCorner = getTopLeftZoom(xZoomCenter,yZoomCenter,zoomBoxSize);
     var nbCharChange = 0;
-    for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner); y++)
+    for(var y = zoomCorner.y; y < (zoomBoxSize + zoomCorner.y); y++)
     {
-        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+        for(var x = zoomCorner.x; x < (zoomCorner.x + zoomBoxSize); x++)
         {
             if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
             {
@@ -515,9 +508,9 @@ function charZoom(xZoomCenter, yZoomCenter, zoomBoxSize, hZoom)
         }
     }
     $.each(detectionResults["textYCoord"], function(textIndex,textCoord){
-        if(textCoord[1] > yZoomCorner && textCoord[0] < yZoomCorner + zoomBoxSize){
+        if(textCoord[1] > zoomCorner.y && textCoord[0] < zoomCorner.y + zoomBoxSize){
             nbCharChange = 0;
-            for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize) - nbCharChange * hZoom; x++)
+            for(var x = zoomCorner.x; x < (zoomCorner.x + zoomBoxSize) - nbCharChange * hZoom; x++)
             {
                 $.each(detectionResults["charCoord"], function(charIndex,charCoord){
                         if(charCoord.x-1 == x){
@@ -554,40 +547,8 @@ function charZoom(xZoomCenter, yZoomCenter, zoomBoxSize, hZoom)
             }
         }
     },this);
-
-    for(var x = xZoomCorner; x <= (xZoomCorner + zoomBoxSize); x++)
-    {
-        if (x < img.width*ZOOM && x > 0)
-        {
-            index = (x + (yZoomCorner) * img.width * ZOOM) * 4;
-            pixelsWrite[index] = 255;
-            pixelsWrite[index + 1] = 0;
-            pixelsWrite[index + 2] = 0;
-            index = (x + (yZoomCorner + zoomBoxSize ) * img.width * ZOOM) * 4;
-            pixelsWrite[index] = 255;
-            pixelsWrite[index + 1] = 0;
-            pixelsWrite[index + 2] = 0;
-        }
-    }
-    
-    for(var y = yZoomCorner ; y <= (yZoomCorner + zoomBoxSize ); y++)
-    {
-        if(xZoomCorner > 0)
-        {
-            index = (xZoomCorner + y * img.width * ZOOM) * 4;
-            pixelsWrite[index] = 255;
-            pixelsWrite[index + 1] = 0;
-            pixelsWrite[index + 2] = 0;
-        }
-        if(xZoomCorner + zoomBoxSize < img.width * ZOOM)
-        {
-            index = (xZoomCorner + zoomBoxSize + y * img.width * ZOOM) * 4;
-            pixelsWrite[index] = 255;
-            pixelsWrite[index + 1] = 0;
-            pixelsWrite[index + 2] = 0;
-        }
-    } 
     ctxSpacesZoom.putImageData(imageWrite, 0, 0);
+    drawZoomRect(zoomCorner, zoomBoxSize, ctxSpacesZoom);
 }
 
 function convertToGray()
@@ -613,7 +574,7 @@ function convertToGray()
 function ocradjs()
 {
     var text = OCRAD(document.getElementById('cvs-input'));
-    console.log(text);
+    //console.log(text);
 }
 
 function appendCanvas(canvasName, width, height, useZoom = true)
