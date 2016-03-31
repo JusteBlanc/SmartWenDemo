@@ -374,7 +374,7 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
     var nbPixels = pixelsData.length / 4;
     var xZoomCorner = xZoomCenter - zoomBoxSize / 2;
     var yZoomCorner = yZoomCenter - zoomBoxSize / 2;
-    var nbLinesChange;
+    var nbLinesChange = 0;
     for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner); y++)
     {
         for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
@@ -388,37 +388,41 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
             }
         }
     }
-    $.each(detectionResults["breakYCoord"], function(breakIndex,breakCoord){
-        var breakCenter = Math.round((breakCoord[0]+breakCoord[1])/2);
-        if(breakCenter + Math.round(breakIndex / 2) * vZoom < (zoomBoxSize + yZoomCorner) && breakCenter > yZoomCorner)
-        {
-            for(var y = breakCenter; y < (zoomBoxSize + yZoomCorner - Math.round(breakIndex / 2) * vZoom); y++)
+            for(var y = yZoomCorner; y < yZoomCorner + zoomBoxSize - nbLinesChange * vZoom ; y++)
             {
+                $.each(detectionResults["breakYCoord"], function(breakIndex,breakCoord){
+                    var breakCenter = Math.round((breakCoord[0]+breakCoord[1])/2);
+                    if(breakCenter == y)
+                    {
+                        for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
+                        {
+                            for (var i = 0; i<vZoom; i++)
+                            {   
+                                if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
+                                {
+                                var index = (x + (y + i + nbLinesChange * vZoom) * img.width * ZOOM) * 4
+                                    pixelsWrite[index] = 255;
+                                    pixelsWrite[index + 1] = 255;
+                                    pixelsWrite[index + 2] = 255;
+                                }                          
+                            }
+                        }
+                        nbLinesChange ++;
+                    }
+                }, this);
                 for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
                 {
                     if (x < img.width*ZOOM && x > 0 &&  y > 0 && y < img.height*ZOOM)
                     {
-                        var index = (x + (y + breakIndex * vZoom) * img.width * ZOOM) * 4;
-                        if(y < (breakCenter + vZoom))
-                        {
-                            pixelsWrite[index] = 255;
-                            pixelsWrite[index + 1] = 255;
-                            pixelsWrite[index + 2] = 255;
-                        }else{
-                            var indexData = (x + (y-vZoom) * img.width * ZOOM) * 4;
-                            pixelsWrite[index] = pixelsData[indexData];
-                            pixelsWrite[index + 1] = pixelsData[indexData + 1];
-                            pixelsWrite[index + 2] = pixelsData[indexData + 2];
-                        }
+                        var indexData = (x + y * img.width * ZOOM) * 4;
+                        var indexWrite = (x + (y + nbLinesChange * vZoom) * img.width * ZOOM) * 4;
+                        pixelsWrite[indexWrite] = pixelsData[indexData];
+                        pixelsWrite[indexWrite + 1] = pixelsData[indexData + 1];
+                        pixelsWrite[indexWrite + 2] = pixelsData[indexData + 2];
                     }
                 }
             }
-        }else{
-            breakIndex--;
-        }
-        nbLinesChange = breakIndex;
-    }, this);
-    for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner + Math.round(nbLinesChange / 2) * vZoom); y++)
+   /* for(var y = yZoomCorner; y < (zoomBoxSize + yZoomCorner /*+ Math.round(nbLinesChange / 2) * vZoom*//*); y++)
     {
         for(var x = xZoomCorner; x < (xZoomCorner + zoomBoxSize); x++)
         {
@@ -431,15 +435,15 @@ function linesZoom(xZoomCenter, yZoomCenter, zoomBoxSize, vZoom)
                     pixelsWrite[indexWrite] = pixelsWrite[indexData];
                     pixelsWrite[indexWrite + 1] = pixelsWrite[indexData + 1];
                     pixelsWrite[indexWrite + 2] = pixelsWrite[indexData + 2];
-             }else{
+             }/*else{
                     pixelsWrite[indexWrite] = 255;
                     pixelsWrite[indexWrite + 1] = 255;
                     pixelsWrite[indexWrite + 2] = 255;
-                }
-            }
+                }*/
+     /*       }
         }
     }
-    
+    */
     for(var x = xZoomCorner; x <= (xZoomCorner + zoomBoxSize); x++)
     {
         if (x < img.width*ZOOM && x > 0)
