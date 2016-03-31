@@ -27,7 +27,7 @@ function neighbourZoom(zoomValue)
     var resultData = ctxNeighbour.getImageData(0, 0, img.width * ZOOM * zoomValue, img.height * ZOOM * zoomValue);
     var resultPixels = resultData.data;
     
-    if(zoomValue > 1)
+    if(zoomValue >= 1)
     {
         //Copie des pixels non modifiés de l'image originale
         for(var y = 0; y < img.height * ZOOM; y++){
@@ -74,14 +74,11 @@ function neighbourZoom(zoomValue)
             }
         }
     }
-    
-    
     ctxNeighbour.putImageData(resultData, 0, 0);
 }
 
 function bilinearInterpolationZoom(zoomValue)
 {
-        
     //Ajout d'un comparatif
     /*var cvs = document.createElement("canvas");
     cvs.id = 'cvs-canvas-zoom';
@@ -98,7 +95,7 @@ function bilinearInterpolationZoom(zoomValue)
     var srcPixels = srcData.data;
     var resultData = ctxBilinear.getImageData(0, 0, img.width * ZOOM * zoomValue, img.height * ZOOM * zoomValue);
     var resultPixels = resultData.data;
-    if(zoomValue > 1)
+    if(zoomValue >= 1)
     {
         // Copie des pixels non modifiés de l'image originale
         for(var y = 0; y < img.height * ZOOM; y++){
@@ -506,12 +503,20 @@ function ocradjs()
     console.log(text);
 }
 
-function appendCanvas(canvasName, width, height)
+function appendCanvas(canvasName, width, height, useZoom = true)
 {
     var cvs = document.createElement("canvas");
     cvs.id = 'cvs-' + canvasName;
+    if(useZoom)
+    {
     cvs.setAttribute("width", width * ZOOM);
     cvs.setAttribute("height",height * ZOOM);
+    }
+    else
+    {
+        cvs.setAttribute("width", width);
+        cvs.setAttribute("height",height);
+    }
     document.getElementById('div-' + canvasName).appendChild(cvs);
 
 }
